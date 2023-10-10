@@ -177,7 +177,7 @@ def reset():
     front_obstacles = []
     for i in population[:-1]:
         i.score = 0
-        i.nn.mutate(find_best())
+        i.nn.mutate(x for x in find_best())
         i.alive = True
         i.rect = pygame.Rect(200, screen.get_height() / 2, 50, 100)
     last = population[-1]
@@ -193,7 +193,7 @@ def find_best():
     f = open("data/weights_hist.txt", "a")
     f.write(f"GEN : {gens} ; SCORE : {best.score} ; WEIGHTS : {best.nn.weights_in.tolist()}, {best.nn.weights_hid1.tolist()}, {best.nn.weights_hid2.tolist()}, {best.nn.weights_out.tolist()}\n")
     f.close()
-    return best.nn.weights_in, best.nn.weights_hid1, best.nn.weights_hid2, best.nn.weights_out
+    return [best.nn.weights_in, best.nn.weights_hid1, best.nn.weights_hid2, best.nn.weights_out]
 
 
 def alldead():
