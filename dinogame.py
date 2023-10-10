@@ -175,13 +175,14 @@ def reset():
     global front_obstacles
     obstacles = []
     front_obstacles = []
+    gens += 1
     for i in population[:-1]:
         i.score = 0
         i.nn.mutate(*find_best())
         i.alive = True
         i.rect = pygame.Rect(200, screen.get_height() / 2, 50, 100)
     last = population[-1]
-    last.nn.copy(find_best())
+    last.nn.copy(*find_best())
     last.alive = True
     last.rect = pygame.Rect(200, screen.get_height() / 2, 50, 100)
     last.score = 0
