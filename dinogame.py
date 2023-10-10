@@ -29,11 +29,6 @@ gens = 1
 
 scores_list = []
 
-max_brain_in = 0
-max_brain_hid1 = 0
-max_brain_hid2 = 0
-max_brain_out = 0
-
 def weights_init(input_size, hidden_size1, hidden_size2, output_size):
     variance_in = 2.0 / (input_size + hidden_size1)
     std_dev_in = np.sqrt(variance_in)
@@ -196,7 +191,7 @@ def find_best():
     best = max(population, key=lambda x: x.score)
     scores_list.append(best.score)
     f = open("data/weights_hist.txt", "a")
-    f.write(f"GEN : {gens} ; SCORE : {best.score} ; WEIGHTS : {max_brain_in.tolist()}, {max_brain_hid1.tolist()}, {max_brain_hid2.tolist()}, {max_brain_out.tolist()}\n")
+    f.write(f"GEN : {gens} ; SCORE : {best.score} ; WEIGHTS : {best.nn.weights_in.tolist()}, {best.nn.weights_hid1.tolist()}, {best.nn.weights_hid2.tolist()}, {best.nn.weights_out.tolist()}\n")
     f.close()
     return best.nn.weights_in, best.nn.weights_hid1, best.nn.weights_hid2, best.nn.weights_out
 
