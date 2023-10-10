@@ -171,10 +171,9 @@ class Obstacle:
 
 
 def reset():
-    global obstacles
-    global front_obstacles
-    obstacles = []
-    front_obstacles = []
+    global gens
+    obstacles.clear()
+    front_obstacles.clear()
     gens += 1
     for i in population[:-1]:
         i.score = 0
