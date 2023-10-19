@@ -17,18 +17,14 @@ font = pygame.font.Font(None, 30)
 pygame.display.set_caption("Dino Game AI")
 
 running = True
-
 obstacles = []
-closest_val = 0
-
 population = []
-
 speed = 2
-
 gens = 1
-
 scores_list = []
 
+
+# Functino initializing NN weights
 def weights_init(input_size, hidden_size1, hidden_size2, output_size):
     variance_in = 2.0 / (input_size + hidden_size1)
     std_dev_in = np.sqrt(variance_in)
@@ -48,6 +44,7 @@ def weights_init(input_size, hidden_size1, hidden_size2, output_size):
 
     return weights_in, weights_hid1, weights_hid2, weights_out
 
+#Create the neural network
 class NN:
     def __init__(self, inputs: int, hiddens1: int, hiddens2: int, outputs: int):
         self.inputs = inputs
@@ -94,6 +91,7 @@ class NN:
         self.weights_out = w_out.copy()
 
 
+# Create player
 class Player:
     def __init__(self):
         self.rect = pygame.Rect(200, screen.get_height() / 2, 50, 100)
@@ -131,6 +129,7 @@ class Player:
             pygame.draw.rect(screen, "grey", self.rect, 5)
 
 
+# Create obstacle
 class Obstacle:
     def __init__(self):
         choice = choices(
@@ -169,33 +168,51 @@ class Obstacle:
         if self.rect.x < -60:
             self.onscreen = False
 
-
-def reset():
+# Function to end a gen, create a new one, and mutate the players at the same time
+def new_gen() :
     global gens
-    obstacles.clear()
-    front_obstacles.clear()
-    gens += 1
+    global obstacles
+    global front_obstacles
+    global scores_list
+
+    # Reset the obstacles lists
+    obstacles = []
+    front_obstacles = []
+    
+    # Find last best player and its NN weights
+    best = max(population, key=lambda x: x.score)
+    score = best.score
+    inp = best.nn.weights_in
+    h1 = best.nn.weights_hid1
+    h2 = best.nn.weights_hid2
+    out = best.nn.weights_out
+
+    # Mutate and reset all but one player
     for i in population[:-1]:
         i.score = 0
-        i.nn.mutate(*find_best())
+        i.nn.mutate(inp,h1,h2,out)
         i.alive = True
         i.rect = pygame.Rect(200, screen.get_height() / 2, 50, 100)
+
+    # Keep the same last best weights and reset one player
     last = population[-1]
-    last.nn.copy(*find_best())
+    last.nn.copy(inp,h1,h2,out)
     last.alive = True
     last.rect = pygame.Rect(200, screen.get_height() / 2, 50, 100)
     last.score = 0
 
+    # Keep track of gens and scores
+    gens += 1
+    scores_list.append(score)
 
-def find_best():
-    best = max(population, key=lambda x: x.score)
-    scores_list.append(best.score)
+    # Save score gen and weights data to file
     f = open("data/weights_hist.txt", "a")
-    f.write(f"GEN : {gens} ; SCORE : {best.score} ; WEIGHTS : {best.nn.weights_in.tolist()}, {best.nn.weights_hid1.tolist()}, {best.nn.weights_hid2.tolist()}, {best.nn.weights_out.tolist()}\n")
+    f.write(f"GEN : {gens} ; SCORE : {int(score)} ; WEIGHTS : {inp.tolist()}, {h1.tolist()}, {h2.tolist()}, {out.tolist()}\n")
     f.close()
-    return best.nn.weights_in, best.nn.weights_hid1, best.nn.weights_hid2, best.nn.weights_out
 
 
+
+# Check if everyone is dead
 def alldead():
     for i in population:
         if i.alive == True:
@@ -203,21 +220,31 @@ def alldead():
     return True
 
 
-population = [Player() for _ in range(600)]
+# Initialize population
+population = [Player() for _ in range(500)]
 
 while running:
     keys = pygame.key.get_pressed()
     screen.fill("white")
+
+    # Check obstacles in front of the player
     front_obstacles = list(filter(lambda e: e.rect.x >= 205, obstacles))
+
+    # show last best (might be dead and not show up)
     if keys[pygame.K_SPACE]:
-        for i in population[:-5]:
+        for i in population[:-1]:
             i.show = not i.show
+    # Draw floor
     pygame.draw.rect(
         screen,
         "black",
         (0, screen.get_height() / 2 + 100, screen.get_width(), screen.get_height() / 2),
     )
+    # One generation
     if not alldead():
+        # Set speed
+        speed = max(population, key=lambda x: x.score).score / 500 + 2
+        # Spawn randomly obstacles
         if (
             choices([0, 1], weights=(0.99, 0.01))[0] == 1
             and obstacles[-1].rect.x < screen.get_width() / 2 + 250
@@ -225,18 +252,19 @@ while running:
             else True
         ):
             obstacles.append(Obstacle())
-        speed = max(population, key=lambda x: x.score).score / 500 + 2
+        # Check if obstacle is on the screen, if not stop rendering it
         for obstacle in obstacles:
             if obstacle.onscreen:
                 obstacle.update()
             else:
                 obstacles.remove(obstacle)
+        # Make move each player
         for player in population:
             if player.alive:
                 closest_obstacle = front_obstacles[0] if front_obstacles else False
                 if closest_obstacle:
+                    # Set input values of neural network
                     input_values = [
-                        #! SETTING THE 7 INPUT VALUES
                         closest_obstacle.rect.x - player.rect.x,
                         closest_obstacle.rect.height,
                         closest_obstacle.rect.width,
@@ -257,12 +285,11 @@ while running:
                         player.rect = pygame.Rect(200, screen.get_height() / 2, 50, 100)
                 player.score += 0.1
                 player.update()
+    # Generation is done
     else:
-        find_best()
-        reset()
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+        new_gen()
+    
+    # Find an alive player to check its score and render all the text
     for i in population:
         if i.alive:
             score_text = font.render(f"Score : {int(i.score)} ", True, (0, 0, 0))
@@ -277,7 +304,12 @@ while running:
             screen.blit(gens_text, (10, 70))
             break
 
+    # Check if closed
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+            
     pygame.display.flip()
-    clock.tick(200)
+    clock.tick(240)
 
 pygame.quit()
