@@ -204,16 +204,14 @@ def new_gen() :
     last.rect = pygame.Rect(200, screen.get_height() / 2, 50, 100)
     last.score = 0
 
-    # Keep track of gens and scores
-    gens += 1
-    scores_list.append(score)
-
     # Save score gen and weights data to file
     f = open("data/weights_hist.txt", "a")
     f.write(f"GEN : {gens} ; SCORE : {int(score)} ; WEIGHTS : {inp.tolist()}, {h1.tolist()}, {h2.tolist()}, {out.tolist()}\n")
     f.close()
-
-
+    
+    # Keep track of gens and scores
+    gens += 1
+    scores_list.append(score)
 
 # Check if everyone is dead
 def alldead():
