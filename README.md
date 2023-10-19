@@ -11,11 +11,10 @@ This app, using Python and the PyGame module, plays the Chrome no-wifi dino game
 ### Requirements
 The following packages are required for this script to work.
 - PyGame
-- Random
 - Numpy
 
 To install these packages, you can simply run: `pip install -r requirements.txt`
 
 
 #### Issue :
-You can press space to show the best player from the last generation, i was unable tho to turn off key repeat so sometimes it will not work.
+You can press space to show the best player from the last generation, I was unable though to turn off key repeat, so sometimes it will not work.
