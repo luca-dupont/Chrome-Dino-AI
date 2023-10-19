@@ -313,6 +313,6 @@ while running:
             running = False
             
     pygame.display.flip()
-    clock.tick(240)
+    clock.tick(200)
 
 pygame.quit()
