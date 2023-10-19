@@ -25,7 +25,7 @@ population = []
 speed = 2
 gens = 1
 scores_list = []
-
+showall = True
 
 # Function initializing NN weights
 def weights_init(input_size, hidden_size1, hidden_size2, output_size):
@@ -233,8 +233,19 @@ while running:
 
     # show last best (might be dead and not show up)
     if keys[pygame.K_SPACE]:
-        for i in population[:-1]:
-            i.show = not i.show
+        showall = not showall 
+    
+    if not showall :
+        for i in population:
+            if i.alive :
+                i.show = True
+                for c in population :
+                    if c != i :
+                        c.show = False
+                break
+    else : 
+        for c in population :
+            c.show = True
     # Draw floor
     pygame.draw.rect(
         screen,
