@@ -6,16 +6,19 @@ import numpy as np
 pygame.font.init()
 pygame.init()
 
+# Load sprites
 cactus_big = pygame.image.load("data/cactus.png")
 cactus_big = pygame.transform.scale_by(cactus_big, 0.6)
 berd = pygame.image.load("data/berd.png")
 berd = pygame.transform.scale_by(berd, 0.6)
 
+# Initialize essential pygame variables
 screen = pygame.display.set_mode((1280, 1280), pygame.RESIZABLE)
 clock = pygame.time.Clock()
 font = pygame.font.Font(None, 30)
 pygame.display.set_caption("Dino Game AI")
 
+# Core variables
 running = True
 obstacles = []
 population = []
@@ -24,7 +27,7 @@ gens = 1
 scores_list = []
 
 
-# Functino initializing NN weights
+# Function initializing NN weights
 def weights_init(input_size, hidden_size1, hidden_size2, output_size):
     variance_in = 2.0 / (input_size + hidden_size1)
     std_dev_in = np.sqrt(variance_in)
