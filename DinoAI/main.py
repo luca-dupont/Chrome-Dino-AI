@@ -85,7 +85,7 @@ class NN:
         ]:
             for i in range(len(weights)):
                 for j in range(len(weights[i])):
-                    weights[i][j] *= uniform(0.8, 1.2)
+                    weights[i][j] *= uniform(0.75, 1.25)
 
     def copy(self, w_in, w_hid1, w_hid2, w_out):
         self.weights_in = w_in.copy()
