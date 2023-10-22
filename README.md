@@ -13,7 +13,7 @@ The following packages are required for this script to work.
 - PyGame
 - Numpy
 
-To install these packages, you can simply run: `pip install -r requirements.txt`
+To install these packages, you can simply run: `pip install -r requirements.txt` inside the directory
 
 
 #### Issue :
