@@ -1,4 +1,5 @@
 # Chrome Dino Game AI
+> NN generative AI to play dino game
 
 ## What does it do? 
 This app, using Python and the PyGame module, plays the Chrome no-wifi dino game and uses generative AI to get better and better at it.
