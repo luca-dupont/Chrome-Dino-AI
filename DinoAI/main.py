@@ -250,7 +250,7 @@ while running:
     pygame.draw.rect(
         screen,
         "black",
-        (0, screen.get_height() / 2 + 100, screen.get_width(), screen.get_height() / 2),
+        (0, screen.get_height() / 2 + 100, screen.get_width(), 10),
     )
     # One generation
     if not alldead():
