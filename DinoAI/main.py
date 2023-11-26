@@ -15,7 +15,7 @@ berd = pygame.transform.scale_by(berd, 0.6)
 # Initialize essential pygame variables
 screen = pygame.display.set_mode((1280, 1280), pygame.RESIZABLE)
 clock = pygame.time.Clock()
-font = pygame.font.Font(None, 30)
+font = pygame.font.SysFont("Arial", 20, True)
 pygame.display.set_caption("Dino Game AI")
 
 # Core variables
@@ -26,6 +26,16 @@ speed = 2
 gens = 1
 scores_list = []
 showall = True
+
+PLAYER_X = 200
+PLAYER_Y = screen.get_height() / 2
+PLAYER_WIDTH = 50
+PLAYER_HEIGHT = 100
+DUCK_Y = screen.get_height() / 2 + 60
+DUCK_WIDTH = 80
+DUCK_HEIGHT = 40
+GRAV = 1
+
 
 # Function initializing NN weights
 def weights_init(input_size, hidden_size1, hidden_size2, output_size):
@@ -47,7 +57,8 @@ def weights_init(input_size, hidden_size1, hidden_size2, output_size):
 
     return weights_in, weights_hid1, weights_hid2, weights_out
 
-#Create the neural network
+
+# Create the neural network
 class NN:
     def __init__(self, inputs: int, hiddens1: int, hiddens2: int, outputs: int):
         self.inputs = inputs
@@ -97,39 +108,38 @@ class NN:
 # Create player
 class Player:
     def __init__(self):
-        self.rect = pygame.Rect(200, screen.get_height() / 2, 50, 100)
+        self.rect = pygame.Rect(PLAYER_X, PLAYER_Y, PLAYER_WIDTH, PLAYER_HEIGHT)
         self.movey = 0
         self.alive = True
-        # self.isduck = False
         self.score = 0
         self.nn = NN(7, 5, 5, 3)
         self.show = True
 
     def jump(self):
         if (
-            self.rect.y == screen.get_height() / 2
-            and self.rect.width == 50
-            and self.rect.height == 100
+            self.rect.y == PLAYER_Y
+            and self.rect.width == PLAYER_WIDTH
+            and self.rect.height == PLAYER_HEIGHT
         ):
             self.movey -= 150
 
     def duck(self):
-        self.rect.width = 80
-        self.rect.height = 40
-        self.rect.y = screen.get_height() / 2 + 60
+        self.rect.width = DUCK_WIDTH
+        self.rect.height = DUCK_HEIGHT
+        self.rect.y = DUCK_Y
 
     def update(self):
         self.rect.y += self.movey
         self.movey = 0
         if pygame.Rect.colliderect(
             self.rect,
-            front_obstacles[0] if front_obstacles else pygame.Rect(0, 0, 10, 10),
+            front_obstacles[0] if front_obstacles else pygame.Rect(0, 0, 1, 1),
         ):
             self.alive = False
-        if self.rect.y < screen.get_height() / 2:
-            self.rect.y += 1
+        if self.rect.y < PLAYER_Y:
+            self.rect.y += GRAV
         if self.show:
-            pygame.draw.rect(screen, "grey", self.rect, 5)
+            pygame.draw.rect(screen, (150,150,150), self.rect, 4)
 
 
 # Create obstacle
@@ -144,7 +154,7 @@ class Obstacle:
             self.rect.topleft = (screen.get_width() + 100, screen.get_height() / 2 + 28)
         elif choice == 1:
             self.rect = berd.get_rect()
-            self.rect.topleft = (screen.get_width() + 100, screen.get_height() / 2 -20)
+            self.rect.topleft = (screen.get_width() + 100, screen.get_height() / 2 - 20)
         elif choice == 2:
             self.rect = berd.get_rect()
             self.rect.topleft = (screen.get_width() + 100, screen.get_height() / 2 - 5)
@@ -157,22 +167,19 @@ class Obstacle:
         global speed
         self.rect.x -= speed
         if self.rect.y == screen.get_height() / 2 + 28:
-            screen.blit(
-                cactus_big, self.rect
-            )
+            screen.blit(cactus_big, self.rect)
             if self.rect.x < -cactus_big.get_width():
                 self.onscreen = False
-        else :
-            screen.blit(
-                berd, self.rect
-            )
+        else:
+            screen.blit(berd, self.rect)
             if self.rect.x < -berd.get_width():
                 self.onscreen = False
         if self.rect.x < -60:
             self.onscreen = False
 
+
 # Function to end a gen, create a new one, and mutate the players at the same time
-def new_gen() :
+def new_gen():
     global gens
     global obstacles
     global front_obstacles
@@ -181,7 +188,7 @@ def new_gen() :
     # Reset the obstacles lists
     obstacles = []
     front_obstacles = []
-    
+
     # Find last best player and its NN weights
     best = max(population, key=lambda x: x.score)
     score = best.score
@@ -193,25 +200,28 @@ def new_gen() :
     # Mutate and reset all but one player
     for i in population[:-1]:
         i.score = 0
-        i.nn.mutate(inp,h1,h2,out)
+        i.nn.mutate(inp, h1, h2, out)
         i.alive = True
-        i.rect = pygame.Rect(200, screen.get_height() / 2, 50, 100)
+        i.rect = pygame.Rect(PLAYER_X, PLAYER_Y, PLAYER_WIDTH, PLAYER_HEIGHT)
 
     # Keep the same last best weights and reset one player
     last = population[-1]
-    last.nn.copy(inp,h1,h2,out)
+    last.nn.copy(inp, h1, h2, out)
     last.alive = True
-    last.rect = pygame.Rect(200, screen.get_height() / 2, 50, 100)
+    last.rect = pygame.Rect(PLAYER_X, PLAYER_Y, PLAYER_WIDTH, PLAYER_HEIGHT)
     last.score = 0
 
     # Save score gen and weights data to file
     f = open("data/weights_hist.txt", "a")
-    f.write(f"GEN : {gens} ; SCORE : {int(score)} ; WEIGHTS : {inp.tolist()}, {h1.tolist()}, {h2.tolist()}, {out.tolist()}\n")
+    f.write(
+        f"GEN : {gens} ; SCORE : {int(score)} ; WEIGHTS : {inp.tolist()}, {h1.tolist()}, {h2.tolist()}, {out.tolist()}\n"
+    )
     f.close()
-    
+
     # Keep track of gens and scores
     gens += 1
     scores_list.append(score)
+
 
 # Check if everyone is dead
 def alldead():
@@ -221,6 +231,17 @@ def alldead():
     return True
 
 
+def draw_floor():
+    pygame.draw.rect(
+        screen, (100,100,100), (0, screen.get_height() / 2 + 80, screen.get_width(), 3)
+    )
+    pygame.draw.rect(
+        screen, (235,235,235), (0, screen.get_height() / 2 + 82, screen.get_width(), screen.get_height()/2)
+    )
+
+
+
+
 # Initialize population
 population = [Player() for _ in range(500)]
 
@@ -228,34 +249,32 @@ while running:
     keys = pygame.key.get_pressed()
     screen.fill("white")
 
+    # Render floor
+    draw_floor()
     # Check obstacles in front of the player
-    front_obstacles = list(filter(lambda e: e.rect.x >= 205, obstacles))
+    front_obstacles = list(filter(lambda e: e.rect.x >= PLAYER_X, obstacles))
 
-    # show last best (might be dead and not show up)
+    # show one player
     if keys[pygame.K_SPACE]:
-        showall = not showall 
-    
-    if not showall :
+        showall = not showall
+
+    if not showall:
         for i in population:
-            if i.alive :
+            if i.alive:
                 i.show = True
-                for c in population :
-                    if c != i :
+                for c in population:
+                    if c != i:
                         c.show = False
                 break
-    else : 
-        for c in population :
-            c.show = True
-    # Draw floor
-    pygame.draw.rect(
-        screen,
-        "black",
-        (0, screen.get_height() / 2 + 100, screen.get_width(), screen.get_height() / 2),
-    )
+    else:
+        for i in population:
+            i.show = True
+
     # One generation
     if not alldead():
         # Set speed
         speed = max(population, key=lambda x: x.score).score / 500 + 2
+
         # Spawn randomly obstacles
         if (
             choices([0, 1], weights=(0.99, 0.01))[0] == 1
@@ -264,6 +283,7 @@ while running:
             else True
         ):
             obstacles.append(Obstacle())
+
         # Check if obstacle is on the screen, if not stop rendering it
         for obstacle in obstacles:
             if obstacle.onscreen:
@@ -294,13 +314,15 @@ while running:
                     if movement_index == 1:
                         player.jump()
                     elif movement_index == 2 and player.rect.width == 80:
-                        player.rect = pygame.Rect(200, screen.get_height() / 2, 50, 100)
+                        player.rect = pygame.Rect(
+                            PLAYER_X, PLAYER_Y, PLAYER_WIDTH, PLAYER_HEIGHT
+                        )
                 player.score += 0.1
                 player.update()
     # Generation is done
     else:
         new_gen()
-    
+
     # Find an alive player to check its score and render all the text
     for i in population:
         if i.alive:
@@ -311,16 +333,20 @@ while running:
                 (0, 0, 0),
             )
             gens_text = font.render(f"Generation : {gens}", True, (0, 0, 0))
+            showing_text = font.render(
+                "Showing : All" if showall else "Showing : Best alive", True, (0, 0, 0)
+            )
             screen.blit(score_text, (10, 10))
             screen.blit(best_text, (10, 40))
             screen.blit(gens_text, (10, 70))
+            screen.blit(showing_text, (10, 100))
             break
 
     # Check if closed
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-            
+
     pygame.display.flip()
     clock.tick(200)
 
