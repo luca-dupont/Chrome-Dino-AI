@@ -247,11 +247,11 @@ while running:
         for c in population :
             c.show = True
     # Draw floor
-    pygame.draw.rect(
-        screen,
-        "black",
-        (0, screen.get_height() / 2 + 100, screen.get_width(), 10),
-    )
+    # pygame.draw.rect(
+    #     screen,
+    #     "black",
+    #     (0, screen.get_height() / 2 + 100, screen.get_width(), 10),
+    # )
     # One generation
     if not alldead():
         # Set speed
