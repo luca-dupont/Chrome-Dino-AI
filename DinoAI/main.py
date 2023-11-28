@@ -233,10 +233,10 @@ def alldead():
 
 def draw_floor():
     pygame.draw.rect(
-        screen, (100,100,100), (0, screen.get_height() / 2 + 80, screen.get_width(), 3)
+        screen, (100,100,100), (0, screen.get_height() / 2 + 80, screen.get_width(), 2)
     )
     pygame.draw.rect(
-        screen, (235,235,235), (0, screen.get_height() / 2 + 82, screen.get_width(), screen.get_height()/2)
+        screen, (235,235,235), (0, screen.get_height() / 2 + 81, screen.get_width(), screen.get_height()/2)
     )
 
 
