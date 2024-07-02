@@ -15,7 +15,3 @@ The following packages are required for this script to work.
 - Numpy
 
 To install these packages, you can simply run: `pip install -r requirements.txt` inside the directory
-
-
-#### Issue :
-You can press space to show one player from the last generation. I was unable though to turn off key repeat, so sometimes it will not work.
