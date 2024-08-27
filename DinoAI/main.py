@@ -17,7 +17,6 @@ screen = pygame.display.set_mode((1280, 1280), pygame.RESIZABLE)
 clock = pygame.time.Clock()
 font = pygame.font.SysFont("Arial", 20, True)
 pygame.display.set_caption("Dino Game AI")
-pygame.key.set_repeat(100,100)
 
 # Core variables
 running = True
@@ -240,26 +239,20 @@ def draw_floor():
         screen, (235,235,235), (0, screen.get_height() / 2 + 81, screen.get_width(), screen.get_height()/2)
     )
 
+
+
+
 # Initialize population
 population = [Player() for _ in range(500)]
 
 while running:
+    keys = pygame.key.get_pressed()
     screen.fill("white")
 
     # Render floor
     draw_floor()
     # Check obstacles in front of the player
     front_obstacles = list(filter(lambda e: e.rect.x >= PLAYER_X, obstacles))
-
-    # Handle key presses and events
-    for event in pygame.event.get():
-        # Check if closed
-        if event.type == pygame.QUIT:
-            running = False
-        # Show one player
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                showall = not showall
 
     if not showall:
         for i in population:
@@ -344,6 +337,14 @@ while running:
             screen.blit(gens_text, (10, 70))
             screen.blit(showing_text, (10, 100))
             break
+
+    # Check if closed
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.KEYDOWN :
+            if event.key == pygame.K_SPACE : 
+                showall = not showall
 
     pygame.display.flip()
     clock.tick(200)
